@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Virtual Reality Tour Guide</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+        h1 { text-align: center; margin: 20px 0; }
+        .info { padding: 10px; }
+        .vr-scene { width: 100%; height: 500px; }
+    </style>
+</head>
+<body>
+    <h1>Virtual Reality Tour Guide</h1>
+    <div class="info">
+        <h2>Tour Locations</h2>
+        <div id="location-list"></div>
+    </div>
+    <div id="sceneContainer">
+        <a-scene id="vr-scene" embedded>
+            <a-entity camera look-controls wasd-controls></a-entity>
+            <a-entity id="sky" geometry="primitive: sphere; radius: 10" material="shader: flat; src: #"></a-entity>
+            <a-entity id="info-panel" text="value: ; align: center; width: 6;" position="0 1 -3"></a-entity>
+        </a-scene>
+    </div>
+
+    <script>
+        async function loadLocations() {
+            const response = await fetch('/locations');
+            const locations = await response.json();
+            const locationList = document.getElementById('location-list');
+            locationList.innerHTML = '';
+            locations.forEach(location => {
+                const div = document.createElement('div');
+                div.className = 'location-item';
+                div.textContent = location.name;
+                div.onclick = () => loadVRScene(location);
+                locationList.appendChild(div);
+            });
+        }
+
+        function loadVRScene(location) {
+            document.getElementById('sky').setAttribute('material', `src: ${location.image_url}`);
+            document.getElementById('info-panel').setAttribute('text', `value: ${location.description}`);
+        }
+
+        loadLocations();
+    </script>
+</body>
+</html>
